@@ -12,3 +12,41 @@ docs/
 
 # Dotenv file
 .env
+\# Forge / Foundry
+cache/
+out/
+artifacts/
+lib/
+
+# Broadcasts
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Env
+.env
+
+# Node
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+
+# Coverage
+coverage/
+
+# Git
+*.orig
+
