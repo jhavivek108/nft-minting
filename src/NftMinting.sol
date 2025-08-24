@@ -41,56 +41,60 @@ contract NftMinting is ERC721, ReentrancyGuard, PaymentSplitter, Ownable {
         _;
     }
 
-   constructor(string memory initialBaseURI, bytes32 root)
-   ERC721("New NFT", "NNFT")
-   Ownable()
-   ReentrancyGuard()
-   PaymentSplitter(_teamMembers, _teamShares) {
-    _baseTokenURI= initialBaseURI;
-    merkleRoot= root;
-   }
+    constructor(string memory initialBaseURI, bytes32 root)
+        ERC721("New NFT", "NNFT")
+        Ownable()
+        ReentrancyGuard()
+        PaymentSplitter(_teamMembers, _teamShares)
+    {
+        _baseTokenURI = initialBaseURI;
+        merkleRoot = root;
+    }
 
-   function togglePause() external onlyOwner {
-     isPaused=!isPaused;
-   }
+    function togglePause() external onlyOwner {
+        isPaused = !isPaused;
+    }
 
-   function togglePreSale() external onlyOwner {
-    isPreSaleActive=!isPreSaleActive;
-   }
+    function togglePreSale() external onlyOwner {
+        isPreSaleActive = !isPreSaleActive;
+    }
 
-   function togglePublicSale() external onlyOwner {
-    isPublicSaleActive=!isPublicSaleActive;
-   }
-   
-   function preSaleMint(uint nftAmount, bytes32[] calldata proof, string[] calldata cids) 
-   external payable onlyEOA nonReentrant isVerified(proof) {
-    require(isPreSaleActive, "PreSale is not active" );
-    require(!isPaused,"Paused");
-    require(nftAmount>0,"NFT amount cant be zero");
-    require(preSaleCount[msg.sender]+nftAmount<=PRESALE_LIMIT, "PreSale Limit exceeded");
-    require(_currentTokenID+nftAmount<=MAX_SUPPLY, "Max Supply exceeded");
-    require(cids.length==nftAmount,"Cids-NFTAmount mismatch");
-    require(msg.value==nftAmount*NFT_MINTING_PRICE, "Incorrect ETH");
+    function togglePublicSale() external onlyOwner {
+        isPublicSaleActive = !isPublicSaleActive;
+    }
 
-    preSaleCount[msg.sender]+= nftAmount;
-    for(uint i=0; i<nftAmount; ) {
-        _mintToken(msg.sender, cids[i]);
-        unchecked {
-            ++i;
+    function preSaleMint(uint256 nftAmount, bytes32[] calldata proof, string[] calldata cids)
+        external
+        payable
+        onlyEOA
+        nonReentrant
+        isVerified(proof)
+    {
+        require(isPreSaleActive, "PreSale is not active");
+        require(!isPaused, "Paused");
+        require(nftAmount > 0, "NFT amount cant be zero");
+        require(preSaleCount[msg.sender] + nftAmount <= PRESALE_LIMIT, "PreSale Limit exceeded");
+        require(_currentTokenID + nftAmount <= MAX_SUPPLY, "Max Supply exceeded");
+        require(cids.length == nftAmount, "Cids-NFTAmount mismatch");
+        require(msg.value == nftAmount * NFT_MINTING_PRICE, "Incorrect ETH");
+
+        preSaleCount[msg.sender] += nftAmount;
+        for (uint256 i = 0; i < nftAmount;) {
+            _mintToken(msg.sender, cids[i]);
+            unchecked {
+                ++i;
+            }
         }
     }
-   }
 
-   function _mintToken(address to, string calldata cid) internal {
-    uint tokenId= _currentTokenID;
-    _safeMint(to, tokenId);
-    if (bytes(cid).length!=0){
-        tokenCids[tokenId] = cid;
+    function _mintToken(address to, string calldata cid) internal {
+        uint256 tokenId = _currentTokenID;
+        _safeMint(to, tokenId);
+        if (bytes(cid).length != 0) {
+            tokenCids[tokenId] = cid;
+        }
+        unchecked {
+            _currentTokenID = tokenId + 1;
+        }
     }
-    unchecked {
-        _currentTokenID= tokenId+1;
-    }
-   }
-
-} 
-
+}
