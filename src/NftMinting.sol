@@ -6,8 +6,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/finance/PaymentSplitter.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract NftMinting is ERC721, ReentrancyGuard, PaymentSplitter, Ownable {
+    using Strings for uint256;
+
     bytes32 public immutable merkleRoot;
     uint256 public constant PRESALE_LIMIT = 5;
     uint256 public constant NFT_MINTING_PRICE = 0.01 ether;
@@ -125,6 +128,24 @@ contract NftMinting is ERC721, ReentrancyGuard, PaymentSplitter, Ownable {
         tokenCids[tokenId] = cid;
     }
 
+    function _baseURI() internal view override returns (string memory) {
+        return _baseTokenURI;
+    }
+
+    function setBaseURI(string calldata newBaseURI) external onlyOwner {
+        _baseTokenURI = newBaseURI;
+    }
+
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        require(_exists(tokenId), "URI query for nonexistent token");
+        string memory base = _baseTokenURI;
+        string memory cid = tokenCids[tokenId];
+        if (bytes(cid).length != 0) {
+            return string(abi.encodePacked(base, cid));
+        }
+        return bytes(base).length > 0 ? string(abi.encodePacked(base, tokenId.toString())) : "";
+    }
+
     function totalSupply() external view returns (uint256) {
         return _currentTokenID;
     }
@@ -137,5 +158,14 @@ contract NftMinting is ERC721, ReentrancyGuard, PaymentSplitter, Ownable {
         require(address(this).balance > 0, "Contract has zero balance");
         (bool success,) = payable(msg.sender).call{value: address(this).balance}("");
         require(success, "Transfer failed");
-    } 
+    }
+
+    function releaseAll() external {
+        for (uint256 i = 0; i < _teamMembers.length;) {
+            release(payable(_teamMembers[i]));
+            unchecked {
+                ++i;
+            }
+        }
+    }
 }
