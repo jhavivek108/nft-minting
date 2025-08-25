@@ -97,4 +97,45 @@ contract NftMinting is ERC721, ReentrancyGuard, PaymentSplitter, Ownable {
             _currentTokenID = tokenId + 1;
         }
     }
+
+    function publicSaleMint(uint256 nftAmount, string[] calldata cids) external payable onlyEOA nonReentrant {
+        require(isPublicSaleActive, "PublicSale is not active");
+        require(!isPaused, "Paused");
+        require(nftAmount > 0, "NFT amount cant be zero");
+        require(_currentTokenID + nftAmount <= MAX_SUPPLY, "Max Supply exceeded");
+        require(cids.length == nftAmount, "Cids-NFTAmount mismatch");
+        require(msg.value == nftAmount * NFT_MINTING_PRICE, "Incorrect ETH");
+
+        for (uint256 i = 0; i < nftAmount;) {
+            _mintToken(msg.sender, cids[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function _requireOwnedBySender(uint256 tokenId) internal view {
+        require(_exists(tokenId), "Nonexistent Token");
+        require(ownerOf(tokenId) == msg.sender, "Owner Mismatch");
+        require(ownerOf(tokenId) != address(0), "Token is not owned");
+    }
+
+    function setCid(uint256 tokenId, string calldata cid) external {
+        _requireOwnedBySender(tokenId);
+        tokenCids[tokenId] = cid;
+    }
+
+    function totalSupply() external view returns (uint256) {
+        return _currentTokenID;
+    }
+
+    function remainingSupply() external view returns (uint256) {
+        return MAX_SUPPLY - _currentTokenID;
+    }
+
+    function withdrawEther() external onlyOwner {
+        require(address(this).balance > 0, "Contract has zero balance");
+        (bool success,) = payable(msg.sender).call{value: address(this).balance}("");
+        require(success, "Transfer failed");
+    } 
 }
