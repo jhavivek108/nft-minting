@@ -39,7 +39,7 @@ jobs:
           forge build --sizes
         id: build
 
-      - name: Run Forge tests
+      - name: Run Forge tests with FFI
         run: |
-          forge test -vvv
+          forge test --ffi -vvv
         id: test
