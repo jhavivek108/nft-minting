@@ -90,18 +90,16 @@ contract NftMintingTest is Test {
     }
 
     function test_toggleState() public {
-        assert(nftMinting.isPaused()==false);
-        assert(nftMinting.isPreSaleActive()==false);
-        assert(nftMinting.isPublicSaleActive()==false);
+        assert(nftMinting.isPaused() == false);
+        assert(nftMinting.isPreSaleActive() == false);
+        assert(nftMinting.isPublicSaleActive() == false);
 
         nftMinting.togglePause();
         nftMinting.togglePreSale();
         nftMinting.togglePublicSale();
 
-        assert(nftMinting.isPaused()==true);
-        assert(nftMinting.isPreSaleActive()==true);
-        assert(nftMinting.isPublicSaleActive()==true);
+        assert(nftMinting.isPaused() == true);
+        assert(nftMinting.isPreSaleActive() == true);
+        assert(nftMinting.isPublicSaleActive() == true);
     }
-
-
 }
