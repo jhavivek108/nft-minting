@@ -12,4 +12,15 @@ const leafNodes = allowlistAddresses.map(addr => keccak256(addr));
 const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
 const root = merkleTree.getHexRoot();
 
+const addressToVerify = "0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2";
+const leaf = keccak256(addressToVerify);
+const proof = merkleTree.getHexProof(leaf);
+
+// Convert to JSON string and remove all whitespace
+const proofString = JSON.stringify(proof).replace(/\s+/g, '');
+
+console.log("Proof String:", proofString);
+console.log("Merkle root:", root);
+
+
 console.log(root);

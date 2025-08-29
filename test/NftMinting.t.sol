@@ -8,7 +8,7 @@ contract NftMintingTest is Test {
     NftMinting public nftMinting;
     bytes32 merkleRoot;
     address owner = address(0x1);
-    address alice = address(0x2);
+    address alice = address(0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2);
 
     function setUp() public {
         string[] memory cmds = new string[](2);
@@ -29,7 +29,31 @@ contract NftMintingTest is Test {
         assert(nftMinting.totalSupply() <= nftMinting.MAX_SUPPLY());
     }
 
-    function test_publicMint() public {
+    function test_preSaleMint() public {
+        nftMinting.togglePreSale();
+        vm.stopPrank();
+
+        bytes32[] memory proof= new bytes32[](2);
+        proof[0]= 0x5931b4ed56ace4c46b68524cb5bcbf4195f1bbaacbe5228fbd090546c88dd229;
+        proof[1]= 0x4726e4102af77216b09ccd94f40daa10531c87c4d60bba7f3b3faf5ff9f19b3c;
+
+        uint256 nftAmount = 2;
+        string[] memory cids = new string[](2);
+        cids[0] = "cid1";
+        cids[1] = "cid2";
+
+        vm.prank(alice, alice);
+        nftMinting.preSaleMint{value: 0.02 ether}(nftAmount, proof, cids);
+
+        assertEq(nftMinting.preSaleCount(alice), 2, "Pre Sale count Mismatch");
+        assertEq(nftMinting.ownerOf(0), alice, "Owner of token 1 mismatch");
+        assertEq(nftMinting.ownerOf(1), alice, "Owner of token 2 mismatch");
+        assertEq(nftMinting.tokenCids(0), "cid1", "Cid 1 mismatch");
+        assertEq(nftMinting.tokenCids(1), "cid2", "Cid 2 mismatch");
+    }
+
+
+    function test_publicSaleMint() public {
         nftMinting.togglePublicSale();
         vm.stopPrank();
 
@@ -102,4 +126,6 @@ contract NftMintingTest is Test {
         assert(nftMinting.isPreSaleActive() == true);
         assert(nftMinting.isPublicSaleActive() == true);
     }
+
+
 }

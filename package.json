@@ -3,5 +3,28 @@
     "@openzeppelin/contracts": "^4.9.6",
     "keccak256": "^1.0.6",
     "merkletreejs": "^0.5.2"
-  }
+  },
+  "name": "nft-minting",
+  "version": "1.0.0",
+  "description": "**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhavivek108/nft-minting.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jhavivek108/nft-minting/issues"
+  },
+  "homepage": "https://github.com/jhavivek108/nft-minting#readme"
 }
