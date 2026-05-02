@@ -33,9 +33,9 @@ contract NftMintingTest is Test {
         nftMinting.togglePreSale();
         vm.stopPrank();
 
-        bytes32[] memory proof= new bytes32[](2);
-        proof[0]= 0x5931b4ed56ace4c46b68524cb5bcbf4195f1bbaacbe5228fbd090546c88dd229;
-        proof[1]= 0x4726e4102af77216b09ccd94f40daa10531c87c4d60bba7f3b3faf5ff9f19b3c;
+        bytes32[] memory proof = new bytes32[](2);
+        proof[0] = 0x5931b4ed56ace4c46b68524cb5bcbf4195f1bbaacbe5228fbd090546c88dd229;
+        proof[1] = 0x4726e4102af77216b09ccd94f40daa10531c87c4d60bba7f3b3faf5ff9f19b3c;
 
         uint256 nftAmount = 2;
         string[] memory cids = new string[](2);
@@ -51,7 +51,6 @@ contract NftMintingTest is Test {
         assertEq(nftMinting.tokenCids(0), "cid1", "Cid 1 mismatch");
         assertEq(nftMinting.tokenCids(1), "cid2", "Cid 2 mismatch");
     }
-
 
     function test_publicSaleMint() public {
         nftMinting.togglePublicSale();
@@ -92,6 +91,36 @@ contract NftMintingTest is Test {
         assertEq(postBalanceOwner - preBalanceOwner, 0.02 ether, "Balance Mismatch");
     }
 
+    function testFuzzWithdrawEther(uint256 nftAmount) public {
+        nftMinting.togglePublicSale();
+        vm.stopPrank();
+        nftAmount = bound(nftAmount, 1, nftMinting.MAX_SUPPLY());
+        uint256 totalNftMintingCost = 0.01 ether * nftAmount;
+
+        string[] memory cids = new string[](nftAmount);
+        for (uint256 i = 0; i < nftAmount;) {
+            cids[i] = string(abi.encodePacked("cids", i));
+            unchecked {
+                ++i;
+            }
+        }
+
+        vm.prank(owner);
+        vm.expectRevert("Contract has zero balance");
+        nftMinting.withdrawEther();
+
+        uint256 preBalanceOwner = address(owner).balance;
+
+        vm.prank(alice, alice);
+        nftMinting.publicSaleMint{value: totalNftMintingCost}(nftAmount, cids);
+
+        vm.prank(owner, owner);
+        nftMinting.withdrawEther();
+
+        uint256 postBalanceOwner = address(owner).balance;
+        assertEq(postBalanceOwner - preBalanceOwner, totalNftMintingCost, "Balance Mismatch");
+    }
+
     function test_setCid() public {
         nftMinting.togglePublicSale();
         vm.stopPrank();
@@ -126,6 +155,4 @@ contract NftMintingTest is Test {
         assert(nftMinting.isPreSaleActive() == true);
         assert(nftMinting.isPublicSaleActive() == true);
     }
-
-
 }
